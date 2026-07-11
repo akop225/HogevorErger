@@ -1,4 +1,4 @@
-const CACHE_NAME = "hogevor-ergaran-v8";
+const CACHE_NAME = "hogevor-ergaran-v9";
 
 const FILES_TO_CACHE = [
     "./",
@@ -7,14 +7,18 @@ const FILES_TO_CACHE = [
     "./manifest.json"
 ];
 
+
 self.addEventListener("install", event => {
     event.waitUntil(
         caches
             .open(CACHE_NAME)
-            .then(cache => cache.addAll(FILES_TO_CACHE))
+            .then(cache => {
+                return cache.addAll(FILES_TO_CACHE);
+            })
             .then(() => self.skipWaiting())
     );
 });
+
 
 self.addEventListener("activate", event => {
     event.waitUntil(
@@ -31,40 +35,88 @@ self.addEventListener("activate", event => {
     );
 });
 
+
 self.addEventListener("fetch", event => {
+
     if (event.request.method !== "GET") {
         return;
     }
 
-    event.respondWith(
-        caches.match(event.request)
-            .then(cachedResponse => {
-                if (cachedResponse) {
-                    return cachedResponse;
-                }
+    const url = new URL(event.request.url);
 
-                return fetch(event.request)
-                    .then(response => {
-                        if (
-                            !response ||
-                            response.status !== 200
-                        ) {
-                            return response;
-                        }
+    const isAppFile =
+        url.origin === self.location.origin &&
+        (
+            url.pathname.endsWith("/") ||
+            url.pathname.endsWith("/index.html") ||
+            url.pathname.endsWith("/songs.json") ||
+            url.pathname.endsWith("/manifest.json")
+        );
 
-                        const responseClone = response.clone();
+
+    if (isAppFile) {
+
+        event.respondWith(
+
+            fetch(event.request)
+
+                .then(response => {
+
+                    if (
+                        response &&
+                        response.status === 200
+                    ) {
+
+                        const responseClone =
+                            response.clone();
 
                         caches
                             .open(CACHE_NAME)
                             .then(cache => {
+
                                 cache.put(
                                     event.request,
                                     responseClone
                                 );
+
                             });
 
-                        return response;
-                    });
+                    }
+
+                    return response;
+
+                })
+
+                .catch(() => {
+
+                    return caches.match(
+                        event.request
+                    );
+
+                })
+
+        );
+
+        return;
+
+    }
+
+
+    event.respondWith(
+
+        caches
+            .match(event.request)
+
+            .then(cachedResponse => {
+
+                if (cachedResponse) {
+                    return cachedResponse;
+                }
+
+                return fetch(event.request);
+
             })
+
     );
+
 });
