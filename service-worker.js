@@ -1,4 +1,4 @@
-const CACHE_NAME = "hogevor-ergaran-v7";
+const CACHE_NAME = "hogevor-ergaran-v8";
 
 const FILES_TO_CACHE = [
     "./",
@@ -9,7 +9,8 @@ const FILES_TO_CACHE = [
 
 self.addEventListener("install", event => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
+        caches
+            .open(CACHE_NAME)
             .then(cache => cache.addAll(FILES_TO_CACHE))
             .then(() => self.skipWaiting())
     );
@@ -17,7 +18,8 @@ self.addEventListener("install", event => {
 
 self.addEventListener("activate", event => {
     event.waitUntil(
-        caches.keys()
+        caches
+            .keys()
             .then(cacheNames => {
                 return Promise.all(
                     cacheNames
@@ -34,33 +36,6 @@ self.addEventListener("fetch", event => {
         return;
     }
 
-    const url = new URL(event.request.url);
-
-    if (url.pathname.endsWith("/songs.json")) {
-        event.respondWith(
-            caches.match("./songs.json")
-                .then(cachedResponse => {
-                    if (cachedResponse) {
-                        return cachedResponse;
-                    }
-
-                    return fetch(event.request)
-                        .then(response => {
-                            const responseClone = response.clone();
-
-                            caches.open(CACHE_NAME)
-                                .then(cache => {
-                                    cache.put("./songs.json", responseClone);
-                                });
-
-                            return response;
-                        });
-                })
-        );
-
-        return;
-    }
-
     event.respondWith(
         caches.match(event.request)
             .then(cachedResponse => {
@@ -72,17 +47,20 @@ self.addEventListener("fetch", event => {
                     .then(response => {
                         if (
                             !response ||
-                            response.status !== 200 ||
-                            response.type === "opaque"
+                            response.status !== 200
                         ) {
                             return response;
                         }
 
                         const responseClone = response.clone();
 
-                        caches.open(CACHE_NAME)
+                        caches
+                            .open(CACHE_NAME)
                             .then(cache => {
-                                cache.put(event.request, responseClone);
+                                cache.put(
+                                    event.request,
+                                    responseClone
+                                );
                             });
 
                         return response;
