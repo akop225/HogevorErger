@@ -6,10 +6,10 @@
     <meta name="theme-color" content="#3b1715">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Hogevor Ergaran">
+    <meta name="apple-mobile-web-app-title" content="Hogevor Erger">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <title>Hogevor Ergaran</title>
+    <title>Hogevor Erger</title>
 
     <style>
         :root {
@@ -58,8 +58,18 @@
         .song-screen { display: none; }
 
         .catalog-header {
-            padding: 18px 4px 22px;
+            position: relative;
+            padding: 18px 54px 22px;
             text-align: center;
+        }
+
+        .about-button {
+            position: absolute; top: 16px; right: 4px;
+            width: 44px; height: 44px; display: flex;
+            align-items: center; justify-content: center; padding: 0;
+            border: 1px solid rgba(255,255,255,.12); border-radius: 14px;
+            background: rgba(24,10,10,.48); color: #fff;
+            font-size: 22px; font-weight: 650; cursor: pointer;
         }
 
         .app-title {
@@ -437,6 +447,161 @@
             .app { padding-left: 28px; padding-right: 28px; }
             .song-row { min-height: 74px; }
         }
+
+        .about-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 24px;
+            box-sizing: border-box;
+
+            background: rgba(0, 0, 0, 0.58);
+
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+
+            transition:
+                opacity 0.2s ease,
+                visibility 0.2s ease;
+        }
+
+        .about-modal.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .about-panel {
+            width: 100%;
+            max-width: 520px;
+
+            padding: 30px 28px 24px;
+            box-sizing: border-box;
+
+            background: #ffffff;
+            border-radius: 28px;
+
+            transform: scale(0.94);
+            opacity: 0;
+
+            transition:
+                transform 0.22s ease,
+                opacity 0.22s ease;
+        }
+
+        .about-modal.open .about-panel {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .about-title {
+            margin: 0 0 24px;
+
+            color: #2c1715;
+
+            font-size: 24px;
+            font-weight: 750;
+            text-align: center;
+        }
+
+        .about-text {
+            margin: 0 0 22px;
+
+            color: #745d59;
+
+            font-size: 16px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .about-primary-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 100%;
+            min-height: 54px;
+
+            padding: 0 18px;
+            box-sizing: border-box;
+
+            background: #5b211d;
+            color: #ffffff;
+
+            border-radius: 15px;
+
+            font-size: 16px;
+            font-weight: 700;
+
+            text-align: center;
+            text-decoration: none;
+
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .about-primary-button:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .about-divider {
+            width: 48px;
+            height: 1px;
+
+            margin: 24px auto;
+
+            background: #e7ddda;
+        }
+
+        .about-telegram-text {
+            margin: 0 0 16px;
+
+            color: #745d59;
+
+            font-size: 15px;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .about-version {
+            margin: 20px 0 16px;
+
+            color: #a18c87;
+
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .about-close-button {
+            width: 100%;
+            min-height: 50px;
+
+            padding: 0;
+
+            border: 0;
+            border-radius: 15px;
+
+            background: #f1eceb;
+            color: #5b211d;
+
+            font-size: 16px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .about-close-button:active {
+            transform: scale(0.98);
+        }
+
     </style>
 </head>
 
@@ -444,8 +609,9 @@
 <div class="app">
     <section id="catalogScreen" class="catalog-screen">
         <header class="catalog-header">
-            <h1 class="app-title">Hogevor Ergaran</h1>
+            <h1 class="app-title">Hogevor Erger</h1>
             <p class="app-subtitle">Духовный песенник</p>
+            <button id="aboutButton" class="about-button" type="button" aria-label="О приложении">ⓘ</button>
         </header>
 
         <div class="search-wrap">
@@ -505,6 +671,57 @@
             <button id="nextButton" class="nav-button" type="button">→</button>
         </div>
     </section>
+</div>
+
+<div id="aboutSheet" class="about-modal">
+    <div class="about-panel">
+
+        <h2 class="about-title">
+            Hogevor Ergaran
+        </h2>
+
+        <p class="about-text">
+            Есть идеи для улучшения?<br>
+            Поделитесь предложением или сообщите об ошибке.
+        </p>
+
+        <a
+            href="https://t.me/jacobsmonah"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="about-primary-button"
+        >
+            Написать разработчикам
+        </a>
+
+        <div class="about-divider"></div>
+
+        <p class="about-telegram-text">
+            Песенник также доступен в Telegram
+        </p>
+
+        <a
+            href="https://t.me/HogevorErgerBot"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="about-primary-button"
+        >
+            Открыть песенник в Telegram
+        </a>
+
+        <div class="about-version">
+            Версия 1.1
+        </div>
+
+        <button
+            id="closeAbout"
+            class="about-close-button"
+            type="button"
+        >
+            Готово
+        </button>
+
+    </div>
 </div>
 
 <div id="settingsSheet" class="settings-sheet">
@@ -575,6 +792,9 @@
     const nextButton = document.getElementById("nextButton");
     const backButton = document.getElementById("backButton");
     const settingsButton = document.getElementById("settingsButton");
+    const aboutButton = document.getElementById("aboutButton");
+    const aboutSheet = document.getElementById("aboutSheet");
+    const closeAbout = document.getElementById("closeAbout");
     const settingsSheet = document.getElementById("settingsSheet");
     const closeSettings = document.getElementById("closeSettings");
     const fontMinus = document.getElementById("fontMinus");
@@ -857,6 +1077,12 @@
     previousButton.addEventListener("click", () => openAdjacentSong(-1));
     nextButton.addEventListener("click", () => openAdjacentSong(1));
     backButton.addEventListener("click", () => history.back());
+
+    aboutButton.addEventListener("click", () => aboutSheet.classList.add("open"));
+    closeAbout.addEventListener("click", () => aboutSheet.classList.remove("open"));
+    aboutSheet.addEventListener("click", event => {
+        if (event.target === aboutSheet) aboutSheet.classList.remove("open");
+    });
 
     settingsButton.addEventListener("click", () => {
         settingsSheet.classList.add("open");
