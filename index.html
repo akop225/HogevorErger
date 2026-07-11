@@ -602,6 +602,37 @@
             transform: scale(0.98);
         }
 
+        /* Анимация перелистывания песен при свайпе */
+        .song-screen { overflow-x: hidden; }
+        .song-swipe-content { will-change: transform, opacity; }
+        .song-slide-out-left { animation: songOutLeft 0.18s ease-in forwards; }
+        .song-slide-out-right { animation: songOutRight 0.18s ease-in forwards; }
+        .song-slide-in-right { animation: songInRight 0.24s ease-out forwards; }
+        .song-slide-in-left { animation: songInLeft 0.24s ease-out forwards; }
+
+        @keyframes songOutLeft {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(-45px); opacity: 0; }
+        }
+        @keyframes songOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(45px); opacity: 0; }
+        }
+        @keyframes songInRight {
+            from { transform: translateX(45px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes songInLeft {
+            from { transform: translateX(-45px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .song-slide-out-left,
+            .song-slide-out-right,
+            .song-slide-in-right,
+            .song-slide-in-left { animation-duration: 0.01ms; }
+        }
+
     </style>
 </head>
 
@@ -655,14 +686,16 @@
             <button id="settingsButton" class="icon-button settings-button" type="button" aria-label="Настройки текста">Aa</button>
         </div>
 
-        <div class="languages">
-            <button class="language-button active" data-language="arm" type="button">🇦🇲</button>
-            <button class="language-button" data-language="ru" type="button">🇷🇺</button>
-            <button class="language-button" data-language="en" type="button">🇬🇧</button>
-        </div>
+        <div id="songSwipeContent" class="song-swipe-content">
+            <div class="languages">
+                <button class="language-button active" data-language="arm" type="button">🇦🇲</button>
+                <button class="language-button" data-language="ru" type="button">🇷🇺</button>
+                <button class="language-button" data-language="en" type="button">🇬🇧</button>
+            </div>
 
-        <div class="song-card">
-            <div id="songText" class="song-text"></div>
+            <div class="song-card">
+                <div id="songText" class="song-text"></div>
+            </div>
         </div>
 
         <div class="navigation">
@@ -801,6 +834,7 @@
     const fontPlus = document.getElementById("fontPlus");
     const fontSizeValue = document.getElementById("fontSizeValue");
     const languageButtons = document.querySelectorAll(".language-button");
+    const songSwipeContent = document.getElementById("songSwipeContent");
 
     async function loadSongs() {
         try {
@@ -1170,6 +1204,58 @@
             );
         }
     }
+
+    let songAnimationRunning = false;
+
+    function animateAdjacentSong(direction) {
+        if (songAnimationRunning) return;
+
+        const targetNumber = getAdjacentSong(direction);
+        if (targetNumber === null) return;
+
+        songAnimationRunning = true;
+
+        const outClass = direction === 1
+            ? "song-slide-out-left"
+            : "song-slide-out-right";
+
+        const inClass = direction === 1
+            ? "song-slide-in-right"
+            : "song-slide-in-left";
+
+        songSwipeContent.classList.remove(
+            "song-slide-out-left",
+            "song-slide-out-right",
+            "song-slide-in-left",
+            "song-slide-in-right"
+        );
+
+        songSwipeContent.classList.add(outClass);
+
+        setTimeout(() => {
+            currentSongNumber = targetNumber;
+            currentLanguage = "arm";
+            renderSong();
+
+            history.replaceState(
+                { screen: "song", number: currentSongNumber },
+                "",
+                `#song-${currentSongNumber}`
+            );
+
+            window.scrollTo(0, 0);
+
+            songSwipeContent.classList.remove(outClass);
+            void songSwipeContent.offsetWidth;
+            songSwipeContent.classList.add(inClass);
+
+            setTimeout(() => {
+                songSwipeContent.classList.remove(inClass);
+                songAnimationRunning = false;
+            }, 250);
+        }, 180);
+    }
+
     let touchStartX = 0;
     let touchStartY = 0;
     let touchEndX = 0;
@@ -1235,9 +1321,9 @@
             }
     
             if (horizontalDistance < 0) {
-                openAdjacentSong(1);
+                animateAdjacentSong(1);
             } else {
-                openAdjacentSong(-1);
+                animateAdjacentSong(-1);
             }
         },
         {
