@@ -2,506 +2,951 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, viewport-fit=cover"
-    >
-
-    <meta name="theme-color" content="#111111">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#3b1715">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta
-        name="apple-mobile-web-app-status-bar-style"
-        content="black-translucent"
-    >
-    <meta
-        name="apple-mobile-web-app-title"
-        content="Hogevor Erger"
-    >
-
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hogevor Ergaran">
     <link rel="manifest" href="manifest.json">
-
-    <title>Hogevor Erger</title>
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Hogevor Ergaran</title>
 
     <style>
-        * {
-            box-sizing: border-box;
+        :root {
+            --app-bg: #3b1715;
+            --app-bg-dark: #2a0e0d;
+            --panel: #ffffff;
+            --song-bg: #ffffff;
+            --song-color: #241817;
+            --song-size: 21px;
+            --muted: rgba(255,255,255,.72);
+            --line: rgba(50,25,22,.12);
         }
 
+        * { box-sizing: border-box; }
+
         html {
-            background: #111111;
+            min-height: 100%;
+            background: var(--app-bg);
         }
 
         body {
             margin: 0;
-
-            background: #111111;
-            color: #ffffff;
-
-            font-family:
-                -apple-system,
-                BlinkMacSystemFont,
-                "SF Pro Display",
-                "SF Pro Text",
-                sans-serif;
-
             min-height: 100vh;
             min-height: 100dvh;
+            background:
+                linear-gradient(180deg, rgba(93,31,26,.34), transparent 240px),
+                var(--app-bg);
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                         "SF Pro Text", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
-        button,
-        input {
-            font: inherit;
-        }
-
-        button {
-            -webkit-tap-highlight-color: transparent;
-        }
+        button, input { font: inherit; }
+        button { -webkit-tap-highlight-color: transparent; }
 
         .app {
             width: 100%;
             max-width: 760px;
-
             margin: 0 auto;
-
-            padding:
-                calc(env(safe-area-inset-top) + 24px)
-                20px
-                calc(env(safe-area-inset-bottom) + 30px);
+            padding: calc(env(safe-area-inset-top) + 18px) 18px
+                     calc(env(safe-area-inset-bottom) + 28px);
         }
 
-        .header {
+        .catalog-screen, .song-screen { width: 100%; }
+        .song-screen { display: none; }
+
+        .catalog-header {
+            position: relative;
+            padding: 18px 54px 22px;
             text-align: center;
-            margin-bottom: 30px;
+        }
+
+        .about-button {
+            position: absolute; top: 16px; right: 4px;
+            width: 44px; height: 44px; display: flex;
+            align-items: center; justify-content: center; padding: 0;
+            border: 1px solid rgba(255,255,255,.12); border-radius: 14px;
+            background: rgba(24,10,10,.48); color: #fff;
+            font-size: 22px; font-weight: 650; cursor: pointer;
         }
 
         .app-title {
             margin: 0;
-
-            font-size: 28px;
-            font-weight: 700;
+            font-size: clamp(30px, 7vw, 42px);
+            line-height: 1.05;
+            font-weight: 750;
+            letter-spacing: -.7px;
         }
 
-        .search-screen {
-            padding-top: 15vh;
+        .app-subtitle {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 15px;
         }
 
-        .search-title {
-            text-align: center;
-
-            font-size: 26px;
-            font-weight: 700;
-
-            margin-bottom: 30px;
+        .search-wrap {
+            position: sticky;
+            top: calc(env(safe-area-inset-top) + 8px);
+            z-index: 10;
+            padding: 7px 0 16px;
+            background: linear-gradient(
+                180deg,
+                var(--app-bg) 0%,
+                var(--app-bg) 78%,
+                rgba(59,23,21,0) 100%
+            );
         }
 
-        .search-form {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
+        .search-box {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 17px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            opacity: .6;
+            pointer-events: none;
         }
 
         .song-input {
             width: 100%;
-
-            border: none;
+            border: 1px solid rgba(255,255,255,.10);
             outline: none;
-
-            border-radius: 18px;
-
-            padding: 18px 20px;
-
-            background: #242424;
-            color: #ffffff;
-
-            font-size: 22px;
-            text-align: center;
-        }
-
-        .song-input::placeholder {
-            color: #777777;
-        }
-
-        .search-button {
-            border: none;
-
-            border-radius: 18px;
-
-            padding: 17px 20px;
-
-            background: #ffffff;
-            color: #111111;
-
+            border-radius: 16px;
+            padding: 15px 48px 15px 50px;
+            background: rgba(24,10,10,.76);
+            color: #fff;
             font-size: 18px;
-            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0,0,0,.12);
+        }
 
+        .song-input::placeholder { color: rgba(255,255,255,.52); }
+
+        .clear-search {
+            display: none;
+            position: absolute;
+            right: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,.12);
+            color: #fff;
             cursor: pointer;
         }
 
-        .error {
-            display: none;
-
-            margin-top: 20px;
-
-            color: #ff6b6b;
-            text-align: center;
-
-            font-size: 16px;
+        .catalog-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 0 0 16px;
+            padding: 5px;
+            border-radius: 16px;
+            background: rgba(24,10,10,.58);
+            border: 1px solid rgba(255,255,255,.08);
         }
 
-        .song-screen {
+        .catalog-tab {
+            min-height: 46px;
+            border: 0;
+            border-radius: 12px;
+            background: transparent;
+            color: rgba(255,255,255,.68);
+            font-size: 16px;
+            font-weight: 650;
+            cursor: pointer;
+        }
+
+        .catalog-tab.active {
+            background: #ffffff;
+            color: #3b1715;
+            box-shadow: 0 5px 16px rgba(0,0,0,.16);
+        }
+
+        .favorite-count {
+            display: inline-flex;
+            min-width: 22px;
+            height: 22px;
+            margin-left: 5px;
+            padding: 0 6px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 11px;
+            background: rgba(91,33,28,.12);
+            font-size: 12px;
+        }
+
+        .catalog-tab:not(.active) .favorite-count {
+            background: rgba(255,255,255,.12);
+        }
+
+        .song-list {
+            overflow: hidden;
+            background: var(--panel);
+            color: #251817;
+            border-radius: 20px;
+            box-shadow: 0 16px 42px rgba(0,0,0,.18);
+        }
+
+        .song-row {
+            width: 100%;
+            min-height: 70px;
+            display: grid;
+            grid-template-columns: 58px minmax(0,1fr) 28px;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px 8px 10px;
+            border: 0;
+            border-bottom: 1px solid var(--line);
+            background: transparent;
+            color: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .song-row:last-child { border-bottom: 0; }
+        .song-row:active { background: #f4eeee; }
+
+        .list-number {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 650;
+            color: #5a2925;
+        }
+
+        .list-title {
+            min-width: 0;
+            font-size: 17px;
+            line-height: 1.28;
+            font-weight: 520;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .list-arrow {
+            color: #9d8c89;
+            font-size: 30px;
+            font-weight: 300;
+            line-height: 1;
+        }
+
+        .empty-state {
             display: none;
+            padding: 40px 20px;
+            text-align: center;
+            color: rgba(255,255,255,.76);
+        }
+
+        .song-topbar {
+            display: grid;
+            grid-template-columns: 48px minmax(0,1fr) 48px;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .icon-button {
+            width: 48px;
+            height: 48px;
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 15px;
+            background: rgba(24,10,10,.48);
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .settings-button {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .song-heading {
+            min-width: 0;
+            text-align: center;
         }
 
         .song-number {
-            text-align: center;
-
-            font-size: 23px;
-            font-weight: 700;
-
-            margin-bottom: 10px;
+            font-size: 21px;
+            line-height: 1.2;
+            font-weight: 750;
         }
 
         .song-title {
-            text-align: center;
-
-            color: #aaaaaa;
-
-            font-size: 17px;
-
-            margin-bottom: 24px;
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.3;
         }
 
         .languages {
             display: flex;
             justify-content: center;
-            gap: 14px;
-
-            margin-bottom: 28px;
+            gap: 12px;
+            margin-bottom: 18px;
         }
 
         .language-button {
-            width: 64px;
-            height: 50px;
-
-            border: none;
-            border-radius: 16px;
-
-            background: #242424;
-
-            font-size: 27px;
-
+            width: 62px;
+            height: 48px;
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 15px;
+            background: rgba(24,10,10,.52);
+            font-size: 26px;
             cursor: pointer;
-
-            transition:
-                transform 0.15s ease,
-                background 0.15s ease;
+            transition: transform .15s ease, background .15s ease;
         }
 
-        .language-button:active {
-            transform: scale(0.94);
-        }
+        .language-button:active { transform: scale(.94); }
 
         .language-button.active {
-            background: #ffffff;
+            background: #fff;
+            box-shadow: 0 7px 18px rgba(0,0,0,.18);
+        }
+
+        .song-card {
+            padding: 24px 22px;
+            border-radius: 22px;
+            background: var(--song-bg);
+            color: var(--song-color);
+            box-shadow: 0 16px 42px rgba(0,0,0,.18);
         }
 
         .song-text {
             white-space: pre-wrap;
-
-            font-size: 21px;
-            line-height: 1.55;
-
+            font-size: var(--song-size);
+            line-height: 1.58;
             overflow-wrap: break-word;
         }
 
         .navigation {
             display: grid;
-
             grid-template-columns: 1fr 1fr 1fr;
-
             gap: 12px;
-
-            margin-top: 35px;
+            margin-top: 16px;
         }
 
         .nav-button {
-            height: 58px;
-
-            border: none;
+            height: 60px;
+            border: 1px solid rgba(255,255,255,.10);
             border-radius: 18px;
-
-            background: #242424;
-            color: #ffffff;
-
-            font-size: 28px;
-
+            background: rgba(24,10,10,.52);
+            color: #fff;
+            font-size: 30px;
             cursor: pointer;
         }
 
-        .nav-button:active {
-            transform: scale(0.96);
+        .nav-button:active { transform: scale(.96); }
+        .favorite-button.active { color: #ffd60a; }
+
+        .settings-sheet {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0,0,0,.48);
+            padding: 18px;
+            align-items: flex-end;
+            justify-content: center;
         }
 
-        .favorite-button.active {
-            color: #ffd60a;
-        }
+        .settings-sheet.open { display: flex; }
 
-        .other-song-button {
+        .settings-panel {
             width: 100%;
+            max-width: 520px;
+            padding: 20px;
+            padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
+            border-radius: 24px;
+            background: #fff;
+            color: #261817;
+            box-shadow: 0 20px 60px rgba(0,0,0,.35);
+        }
 
-            margin-top: 14px;
+        .settings-title {
+            margin: 0 0 20px;
+            text-align: center;
+            font-size: 21px;
+        }
 
-            border: none;
-            border-radius: 18px;
+        .setting-label {
+            margin: 18px 0 10px;
+            font-size: 14px;
+            font-weight: 650;
+            color: #745d59;
+        }
 
-            padding: 17px 20px;
+        .font-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
 
-            background: #242424;
-            color: #ffffff;
-
-            font-size: 17px;
-
+        .setting-button {
+            min-height: 48px;
+            border: 0;
+            border-radius: 14px;
+            background: #f0e9e7;
+            color: #321b18;
+            font-size: 18px;
             cursor: pointer;
         }
+
+        .size-value {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: #f7f3f2;
+            font-weight: 700;
+        }
+
+        .swatches {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .swatch {
+            width: 45px;
+            height: 45px;
+            border: 3px solid transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,.14);
+        }
+
+        .swatch.active {
+            border-color: #8d3b32;
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px #8d3b32;
+        }
+
+        .close-settings {
+            width: 100%;
+            margin-top: 24px;
+            min-height: 52px;
+            border: 0;
+            border-radius: 15px;
+            background: #4a1c18;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        @media (min-width: 650px) {
+            .app { padding-left: 28px; padding-right: 28px; }
+            .song-row { min-height: 74px; }
+        }
+
+        .about-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 24px;
+            box-sizing: border-box;
+
+            background: rgba(0, 0, 0, 0.58);
+
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+
+            transition:
+                opacity 0.2s ease,
+                visibility 0.2s ease;
+        }
+
+        .about-modal.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .about-panel {
+            width: 100%;
+            max-width: 520px;
+
+            padding: 30px 28px 24px;
+            box-sizing: border-box;
+
+            background: #ffffff;
+            border-radius: 28px;
+
+            transform: scale(0.94);
+            opacity: 0;
+
+            transition:
+                transform 0.22s ease,
+                opacity 0.22s ease;
+        }
+
+        .about-modal.open .about-panel {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .about-title {
+            margin: 0 0 24px;
+
+            color: #2c1715;
+
+            font-size: 24px;
+            font-weight: 750;
+            text-align: center;
+        }
+
+        .about-text {
+            margin: 0 0 22px;
+
+            color: #745d59;
+
+            font-size: 16px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .about-primary-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 100%;
+            min-height: 54px;
+
+            padding: 0 18px;
+            box-sizing: border-box;
+
+            background: #5b211d;
+            color: #ffffff;
+
+            border-radius: 15px;
+
+            font-size: 16px;
+            font-weight: 700;
+
+            text-align: center;
+            text-decoration: none;
+
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .about-primary-button:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .about-divider {
+            width: 48px;
+            height: 1px;
+
+            margin: 24px auto;
+
+            background: #e7ddda;
+        }
+
+        .about-telegram-text {
+            margin: 0 0 16px;
+
+            color: #745d59;
+
+            font-size: 15px;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .about-version {
+            margin: 20px 0 16px;
+
+            color: #a18c87;
+
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .about-close-button {
+            width: 100%;
+            min-height: 50px;
+
+            padding: 0;
+
+            border: 0;
+            border-radius: 15px;
+
+            background: #f1eceb;
+            color: #5b211d;
+
+            font-size: 16px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .about-close-button:active {
+            transform: scale(0.98);
+        }
+
     </style>
 </head>
 
 <body>
-
 <div class="app">
+    <section id="catalogScreen" class="catalog-screen">
+        <header class="catalog-header">
+            <h1 class="app-title">Hogevor Ergaran</h1>
+            <p class="app-subtitle">Духовный песенник</p>
+            <button id="aboutButton" class="about-button" type="button" aria-label="О приложении">ⓘ</button>
+        </header>
 
-    <section
-        id="searchScreen"
-        class="search-screen"
-    >
-        <h1 class="search-title">
-            Hogevor Erger
-        </h1>
-
-        <form
-            id="searchForm"
-            class="search-form"
-        >
-            <input
-                id="songInput"
-                class="song-input"
-                type="number"
-                inputmode="numeric"
-                placeholder="Номер песни"
-                min="1"
-                autocomplete="off"
-            >
-
-            <button
-                class="search-button"
-                type="submit"
-            >
-                Найти песню
-            </button>
-        </form>
-
-        <div
-            id="error"
-            class="error"
-        >
-            Песня не найдена
+        <div class="search-wrap">
+            <div class="search-box">
+                <span class="search-icon">⌕</span>
+                <input
+                    id="songInput"
+                    class="song-input"
+                    type="search"
+                    inputmode="search"
+                    placeholder="Поиск по номеру или названию"
+                    autocomplete="off"
+                    enterkeyhint="search"
+                >
+                <button id="clearSearch" class="clear-search" type="button">✕</button>
+            </div>
         </div>
+
+        <div class="catalog-tabs">
+            <button id="allSongsTab" class="catalog-tab active" type="button">
+                Все песни
+            </button>
+            <button id="favoritesTab" class="catalog-tab" type="button">
+                ☆ Избранное <span id="favoriteCount" class="favorite-count">0</span>
+            </button>
+        </div>
+
+        <div id="songList" class="song-list"></div>
+        <div id="emptyState" class="empty-state">Песня не найдена</div>
     </section>
 
+    <section id="songScreen" class="song-screen">
+        <div class="song-topbar">
+            <button id="backButton" class="icon-button" type="button" aria-label="Назад">←</button>
 
-    <section
-        id="songScreen"
-        class="song-screen"
-    >
-        <div
-            id="songNumber"
-            class="song-number"
-        ></div>
+            <div class="song-heading">
+                <div id="songNumber" class="song-number"></div>
+                <div id="songTitle" class="song-title"></div>
+            </div>
 
-        <div
-            id="songTitle"
-            class="song-title"
-        ></div>
-
+            <button id="settingsButton" class="icon-button settings-button" type="button" aria-label="Настройки текста">Aa</button>
+        </div>
 
         <div class="languages">
-
-            <button
-                class="language-button active"
-                data-language="arm"
-            >
-                🇦🇲
-            </button>
-
-            <button
-                class="language-button"
-                data-language="ru"
-            >
-                🇷🇺
-            </button>
-
-            <button
-                class="language-button"
-                data-language="en"
-            >
-                🇬🇧
-            </button>
-
+            <button class="language-button active" data-language="arm" type="button">🇦🇲</button>
+            <button class="language-button" data-language="ru" type="button">🇷🇺</button>
+            <button class="language-button" data-language="en" type="button">🇬🇧</button>
         </div>
 
-
-        <div
-            id="songText"
-            class="song-text"
-        ></div>
-
+        <div class="song-card">
+            <div id="songText" class="song-text"></div>
+        </div>
 
         <div class="navigation">
-
-            <button
-                id="previousButton"
-                class="nav-button"
-            >
-                ←
-            </button>
-
-            <button
-                id="favoriteButton"
-                class="nav-button favorite-button"
-            >
-                ☆
-            </button>
-
-            <button
-                id="nextButton"
-                class="nav-button"
-            >
-                →
-            </button>
-
+            <button id="previousButton" class="nav-button" type="button">←</button>
+            <button id="favoriteButton" class="nav-button favorite-button" type="button">☆</button>
+            <button id="nextButton" class="nav-button" type="button">→</button>
         </div>
-
-
-        <button
-            id="otherSongButton"
-            class="other-song-button"
-        >
-            🔍 Другая песня
-        </button>
-
     </section>
-
 </div>
 
+<div id="aboutSheet" class="about-modal">
+    <div class="about-panel">
+
+        <h2 class="about-title">
+            Hogevor Ergaran
+        </h2>
+
+        <p class="about-text">
+            Есть идеи для улучшения?<br>
+            Поделитесь предложением или сообщите об ошибке.
+        </p>
+
+        <a
+            href="https://t.me/jacobsmonah"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="about-primary-button"
+        >
+            Написать разработчикам
+        </a>
+
+        <div class="about-divider"></div>
+
+        <p class="about-telegram-text">
+            Песенник также доступен в Telegram
+        </p>
+
+        <a
+            href="https://t.me/HogevorErgerBot"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="about-primary-button"
+        >
+            Открыть песенник в Telegram
+        </a>
+
+        <div class="about-version">
+            Версия 1.1
+        </div>
+
+        <button
+            id="closeAbout"
+            class="about-close-button"
+            type="button"
+        >
+            Готово
+        </button>
+
+    </div>
+</div>
+
+<div id="settingsSheet" class="settings-sheet">
+    <div class="settings-panel">
+        <h2 class="settings-title">Оформление текста</h2>
+
+        <div class="setting-label">Размер текста</div>
+        <div class="font-controls">
+            <button id="fontMinus" class="setting-button" type="button">A−</button>
+            <div id="fontSizeValue" class="size-value">21</div>
+            <button id="fontPlus" class="setting-button" type="button">A+</button>
+        </div>
+
+        <div class="setting-label">Цвет текста</div>
+        <div id="textSwatches" class="swatches">
+            <button class="swatch text-swatch" data-color="#241817" style="background:#241817" type="button"></button>
+            <button class="swatch text-swatch" data-color="#000000" style="background:#000000" type="button"></button>
+            <button class="swatch text-swatch" data-color="#5b211c" style="background:#5b211c" type="button"></button>
+            <button class="swatch text-swatch" data-color="#17314f" style="background:#17314f" type="button"></button>
+        </div>
+
+        <div class="setting-label">Фон окна песни</div>
+        <div id="backgroundSwatches" class="swatches">
+            <button class="swatch background-swatch" data-color="#ffffff" style="background:#ffffff" type="button"></button>
+            <button class="swatch background-swatch" data-color="#fff8ed" style="background:#fff8ed" type="button"></button>
+            <button class="swatch background-swatch" data-color="#f4ece7" style="background:#f4ece7" type="button"></button>
+            <button class="swatch background-swatch" data-color="#e9e1d5" style="background:#e9e1d5" type="button"></button>
+        </div>
+
+        <button id="closeSettings" class="close-settings" type="button">Готово</button>
+    </div>
+</div>
 
 <script>
     let songs = {};
-
     let currentSongNumber = null;
     let currentLanguage = "arm";
+    let currentCatalogTab = "all";
 
-    let favorites = JSON.parse(
-        localStorage.getItem("favorites") || "[]"
+    let favorites = JSON.parse(localStorage.getItem("favorites") || "[]")
+        .map(Number)
+        .filter(Number.isFinite);
+
+    const savedSettings = JSON.parse(
+        localStorage.getItem("readerSettings") || "{}"
     );
 
+    let readerSettings = {
+        fontSize: savedSettings.fontSize || 21,
+        textColor: savedSettings.textColor || "#241817",
+        backgroundColor: savedSettings.backgroundColor || "#ffffff"
+    };
 
-    const searchScreen =
-        document.getElementById("searchScreen");
-
-    const songScreen =
-        document.getElementById("songScreen");
-
-    const searchForm =
-        document.getElementById("searchForm");
-
-    const songInput =
-        document.getElementById("songInput");
-
-    const error =
-        document.getElementById("error");
-
-    const songNumber =
-        document.getElementById("songNumber");
-
-    const songTitle =
-        document.getElementById("songTitle");
-
-    const songText =
-        document.getElementById("songText");
-
-    const favoriteButton =
-        document.getElementById("favoriteButton");
-
-    const previousButton =
-        document.getElementById("previousButton");
-
-    const nextButton =
-        document.getElementById("nextButton");
-
-    const otherSongButton =
-        document.getElementById("otherSongButton");
-
-    const languageButtons =
-        document.querySelectorAll(".language-button");
-
+    const catalogScreen = document.getElementById("catalogScreen");
+    const songScreen = document.getElementById("songScreen");
+    const songInput = document.getElementById("songInput");
+    const clearSearch = document.getElementById("clearSearch");
+    const songList = document.getElementById("songList");
+    const emptyState = document.getElementById("emptyState");
+    const allSongsTab = document.getElementById("allSongsTab");
+    const favoritesTab = document.getElementById("favoritesTab");
+    const favoriteCount = document.getElementById("favoriteCount");
+    const songNumber = document.getElementById("songNumber");
+    const songTitle = document.getElementById("songTitle");
+    const songText = document.getElementById("songText");
+    const favoriteButton = document.getElementById("favoriteButton");
+    const previousButton = document.getElementById("previousButton");
+    const nextButton = document.getElementById("nextButton");
+    const backButton = document.getElementById("backButton");
+    const settingsButton = document.getElementById("settingsButton");
+    const aboutButton = document.getElementById("aboutButton");
+    const aboutSheet = document.getElementById("aboutSheet");
+    const closeAbout = document.getElementById("closeAbout");
+    const settingsSheet = document.getElementById("settingsSheet");
+    const closeSettings = document.getElementById("closeSettings");
+    const fontMinus = document.getElementById("fontMinus");
+    const fontPlus = document.getElementById("fontPlus");
+    const fontSizeValue = document.getElementById("fontSizeValue");
+    const languageButtons = document.querySelectorAll(".language-button");
 
     async function loadSongs() {
-        const response = await fetch("songs.json");
+        try {
+            const response = await fetch("./songs.json");
 
-        songs = await response.json();
+            if (!response.ok) {
+                throw new Error(
+                    `Не удалось загрузить songs.json: ${response.status}`
+                );
+            }
+
+            songs = await response.json();
+
+            console.log(
+                "Песни загружены:",
+                Object.keys(songs).length
+            );
+
+            renderSongList();
+
+        } catch (loadError) {
+            console.error(
+                "Не удалось загрузить песни:",
+                loadError
+            );
+
+            emptyState.textContent =
+                "Не удалось загрузить список песен";
+
+            emptyState.style.display = "block";
+        }
     }
 
+    function getSortedSongNumbers() {
+        return Object.keys(songs)
+            .map(Number)
+            .filter(Number.isFinite)
+            .sort((a, b) => a - b);
+    }
 
-    function openSong(number) {
+    function getSongTitle(song, number) {
+        const title = String(song?.title || "").trim();
+        return title || `Песня №${number}`;
+    }
+
+    function renderSongList(query = songInput.value) {
+        const normalizedQuery = String(query).trim().toLocaleLowerCase();
+        const fragment = document.createDocumentFragment();
+
+        songList.innerHTML = "";
+        favoriteCount.textContent = favorites.length;
+
+        allSongsTab.classList.toggle("active", currentCatalogTab === "all");
+        favoritesTab.classList.toggle("active", currentCatalogTab === "favorites");
+
+        const filteredNumbers = getSortedSongNumbers().filter(number => {
+            if (
+                currentCatalogTab === "favorites" &&
+                !favorites.includes(number)
+            ) {
+                return false;
+            }
+
+            const song = songs[String(number)];
+            const title = getSongTitle(song, number).toLocaleLowerCase();
+
+            return !normalizedQuery ||
+                String(number).includes(normalizedQuery) ||
+                title.includes(normalizedQuery);
+        });
+
+        filteredNumbers.forEach(number => {
+            const song = songs[String(number)];
+
+            const row = document.createElement("button");
+            row.className = "song-row";
+            row.type = "button";
+
+            const numberElement = document.createElement("span");
+            numberElement.className = "list-number";
+            numberElement.textContent = number;
+
+            const titleElement = document.createElement("span");
+            titleElement.className = "list-title";
+            titleElement.textContent = getSongTitle(song, number);
+
+            const arrowElement = document.createElement("span");
+            arrowElement.className = "list-arrow";
+            arrowElement.textContent = "›";
+
+            row.append(numberElement, titleElement, arrowElement);
+            row.addEventListener("click", () => openSong(number));
+
+            fragment.appendChild(row);
+        });
+
+        songList.appendChild(fragment);
+
+        const hasSongs = filteredNumbers.length > 0;
+        songList.style.display = hasSongs ? "block" : "none";
+        emptyState.style.display = hasSongs ? "none" : "block";
+
+        if (!hasSongs) {
+            emptyState.textContent =
+                currentCatalogTab === "favorites" && !normalizedQuery
+                    ? "В избранном пока нет песен"
+                    : "Песня не найдена";
+        }
+    }
+
+    function openSong(number, addHistory = true) {
         const key = String(number);
 
-        if (!songs[key]) {
-            error.style.display = "block";
-
-            return;
-        }
-
-        error.style.display = "none";
+        if (!songs[key]) return;
 
         currentSongNumber = Number(number);
-
         currentLanguage = "arm";
 
-        searchScreen.style.display = "none";
+        catalogScreen.style.display = "none";
         songScreen.style.display = "block";
 
         renderSong();
 
-        window.scrollTo({
-            top: 0,
-            behavior: "instant"
-        });
-    }
-
-
-    function renderSong() {
-        const song =
-            songs[String(currentSongNumber)];
-
-        if (!song) {
-            return;
+        if (addHistory) {
+            history.pushState(
+                { screen: "song", number: currentSongNumber },
+                "",
+                `#song-${currentSongNumber}`
+            );
         }
 
-        songNumber.textContent =
-            `🎵 Песня №${currentSongNumber}`;
+        window.scrollTo(0, 0);
+    }
 
-        songTitle.textContent =
-            song.title || "";
+    function renderSong() {
+        const song = songs[String(currentSongNumber)];
+        if (!song) return;
 
-        songText.textContent =
-            song[currentLanguage] || "";
+        songNumber.textContent = `Песня №${currentSongNumber}`;
+        songTitle.textContent = getSongTitle(song, currentSongNumber);
+        songText.textContent = song[currentLanguage] || "";
 
         updateLanguageButtons();
         updateFavoriteButton();
+        applyReaderSettings();
     }
-
 
     function updateLanguageButtons() {
         languageButtons.forEach(button => {
@@ -512,24 +957,15 @@
         });
     }
 
-
     function updateFavoriteButton() {
-        const isFavorite =
-            favorites.includes(currentSongNumber);
+        const isFavorite = favorites.includes(currentSongNumber);
 
-        favoriteButton.textContent =
-            isFavorite ? "★" : "☆";
-
-        favoriteButton.classList.toggle(
-            "active",
-            isFavorite
-        );
+        favoriteButton.textContent = isFavorite ? "★" : "☆";
+        favoriteButton.classList.toggle("active", isFavorite);
     }
 
-
     function toggleFavorite() {
-        const index =
-            favorites.indexOf(currentSongNumber);
+        const index = favorites.indexOf(currentSongNumber);
 
         if (index === -1) {
             favorites.push(currentSongNumber);
@@ -537,119 +973,209 @@
             favorites.splice(index, 1);
         }
 
-        localStorage.setItem(
-            "favorites",
-            JSON.stringify(favorites)
-        );
-
+        localStorage.setItem("favorites", JSON.stringify(favorites));
         updateFavoriteButton();
-    }
+        favoriteCount.textContent = favorites.length;
 
-
-    function openPreviousSong() {
-        const previousNumber =
-            currentSongNumber - 1;
-
-        if (songs[String(previousNumber)]) {
-            currentSongNumber =
-                previousNumber;
-
-            renderSong();
-
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
+        if (currentCatalogTab === "favorites") {
+            renderSongList();
         }
     }
 
+    function getAdjacentSong(direction) {
+        const numbers = getSortedSongNumbers();
+        const currentIndex = numbers.indexOf(currentSongNumber);
+        const targetIndex = currentIndex + direction;
 
-    function openNextSong() {
-        const nextNumber =
-            currentSongNumber + 1;
-
-        if (songs[String(nextNumber)]) {
-            currentSongNumber =
-                nextNumber;
-
-            renderSong();
-
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
-        }
+        return numbers[targetIndex] ?? null;
     }
 
+    function openAdjacentSong(direction) {
+        const targetNumber = getAdjacentSong(direction);
+        if (targetNumber === null) return;
 
-    function showSearch() {
-        songScreen.style.display = "none";
-        searchScreen.style.display = "block";
+        currentSongNumber = targetNumber;
+        currentLanguage = "arm";
+        renderSong();
 
-        songInput.value = "";
-
-        setTimeout(() => {
-            songInput.focus();
-        }, 100);
-    }
-
-
-    searchForm.addEventListener(
-        "submit",
-        event => {
-            event.preventDefault();
-
-            openSong(songInput.value);
-        }
-    );
-
-
-    languageButtons.forEach(button => {
-        button.addEventListener(
-            "click",
-            () => {
-                currentLanguage =
-                    button.dataset.language;
-
-                renderSong();
-            }
+        history.replaceState(
+            { screen: "song", number: currentSongNumber },
+            "",
+            `#song-${currentSongNumber}`
         );
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showCatalog(useHistory = true) {
+        songScreen.style.display = "none";
+        catalogScreen.style.display = "block";
+        settingsSheet.classList.remove("open");
+
+        if (useHistory) {
+            history.pushState({ screen: "catalog" }, "", location.pathname);
+        }
+
+        window.scrollTo(0, 0);
+    }
+
+    function saveReaderSettings() {
+        localStorage.setItem(
+            "readerSettings",
+            JSON.stringify(readerSettings)
+        );
+    }
+
+    function applyReaderSettings() {
+        document.documentElement.style.setProperty(
+            "--song-size",
+            `${readerSettings.fontSize}px`
+        );
+
+        document.documentElement.style.setProperty(
+            "--song-color",
+            readerSettings.textColor
+        );
+
+        document.documentElement.style.setProperty(
+            "--song-bg",
+            readerSettings.backgroundColor
+        );
+
+        fontSizeValue.textContent = readerSettings.fontSize;
+
+        document.querySelectorAll(".text-swatch").forEach(button => {
+            button.classList.toggle(
+                "active",
+                button.dataset.color === readerSettings.textColor
+            );
+        });
+
+        document.querySelectorAll(".background-swatch").forEach(button => {
+            button.classList.toggle(
+                "active",
+                button.dataset.color === readerSettings.backgroundColor
+            );
+        });
+    }
+
+    allSongsTab.addEventListener("click", () => {
+        currentCatalogTab = "all";
+        renderSongList();
     });
 
+    favoritesTab.addEventListener("click", () => {
+        currentCatalogTab = "favorites";
+        renderSongList();
+    });
 
-    favoriteButton.addEventListener(
-        "click",
-        toggleFavorite
-    );
+    songInput.addEventListener("input", () => {
+        clearSearch.style.display = songInput.value ? "block" : "none";
+        renderSongList(songInput.value);
+    });
 
+    clearSearch.addEventListener("click", () => {
+        songInput.value = "";
+        clearSearch.style.display = "none";
+        renderSongList();
+        songInput.focus();
+    });
 
-    previousButton.addEventListener(
-        "click",
-        openPreviousSong
-    );
+    languageButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            currentLanguage = button.dataset.language;
+            renderSong();
+        });
+    });
 
+    favoriteButton.addEventListener("click", toggleFavorite);
+    previousButton.addEventListener("click", () => openAdjacentSong(-1));
+    nextButton.addEventListener("click", () => openAdjacentSong(1));
+    backButton.addEventListener("click", () => history.back());
 
-    nextButton.addEventListener(
-        "click",
-        openNextSong
-    );
+    aboutButton.addEventListener("click", () => aboutSheet.classList.add("open"));
+    closeAbout.addEventListener("click", () => aboutSheet.classList.remove("open"));
+    aboutSheet.addEventListener("click", event => {
+        if (event.target === aboutSheet) aboutSheet.classList.remove("open");
+    });
 
+    settingsButton.addEventListener("click", () => {
+        settingsSheet.classList.add("open");
+    });
 
-    otherSongButton.addEventListener(
-        "click",
-        showSearch
-    );
+    closeSettings.addEventListener("click", () => {
+        settingsSheet.classList.remove("open");
+    });
 
+    settingsSheet.addEventListener("click", event => {
+        if (event.target === settingsSheet) {
+            settingsSheet.classList.remove("open");
+        }
+    });
 
-    loadSongs();
+    fontMinus.addEventListener("click", () => {
+        readerSettings.fontSize = Math.max(15, readerSettings.fontSize - 1);
+        applyReaderSettings();
+        saveReaderSettings();
+    });
 
+    fontPlus.addEventListener("click", () => {
+        readerSettings.fontSize = Math.min(36, readerSettings.fontSize + 1);
+        applyReaderSettings();
+        saveReaderSettings();
+    });
+
+    document.querySelectorAll(".text-swatch").forEach(button => {
+        button.addEventListener("click", () => {
+            readerSettings.textColor = button.dataset.color;
+            applyReaderSettings();
+            saveReaderSettings();
+        });
+    });
+
+    document.querySelectorAll(".background-swatch").forEach(button => {
+        button.addEventListener("click", () => {
+            readerSettings.backgroundColor = button.dataset.color;
+            applyReaderSettings();
+            saveReaderSettings();
+        });
+    });
+
+    window.addEventListener("popstate", event => {
+        if (event.state?.screen === "song" && event.state.number) {
+            openSong(event.state.number, false);
+        } else {
+            showCatalog(false);
+        }
+    });
+
+    async function startApp() {
+        applyReaderSettings();
+        await loadSongs();
+
+        const hashMatch = location.hash.match(/^#song-(\d+)$/);
+
+        if (hashMatch && songs[hashMatch[1]]) {
+            history.replaceState(
+                { screen: "song", number: Number(hashMatch[1]) },
+                "",
+                location.href
+            );
+            openSong(Number(hashMatch[1]), false);
+        } else {
+            history.replaceState(
+                { screen: "catalog" },
+                "",
+                location.pathname
+            );
+        }
+    }
+
+    startApp();
 
     if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register(
-            "service-worker.js"
-        );
+        navigator.serviceWorker.register("service-worker.js");
     }
 </script>
-
 </body>
 </html>
