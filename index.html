@@ -604,7 +604,13 @@
 
         /* Анимация перелистывания песен при свайпе */
         .song-screen { overflow-x: hidden; }
-        .song-swipe-content { will-change: transform, opacity; }
+        .song-swipe-content {
+            will-change: transform, opacity;
+        }
+
+        .song-swipe-content.is-animating {
+            pointer-events: none;
+        }
         .song-slide-out-left { animation: songOutLeft 0.18s ease-in forwards; }
         .song-slide-out-right { animation: songOutRight 0.18s ease-in forwards; }
         .song-slide-in-right { animation: songInRight 0.24s ease-out forwards; }
@@ -1042,6 +1048,7 @@
     }
 
     function showCatalog(useHistory = true) {
+        clearSongAnimation();
         songScreen.style.display = "none";
         catalogScreen.style.display = "block";
         settingsSheet.classList.remove("open");
@@ -1125,7 +1132,10 @@
     favoriteButton.addEventListener("click", toggleFavorite);
     previousButton.addEventListener("click", () => openAdjacentSong(-1));
     nextButton.addEventListener("click", () => openAdjacentSong(1));
-    backButton.addEventListener("click", () => history.back());
+    backButton.addEventListener("click", () => {
+        clearSongAnimation();
+        showCatalog(true);
+    });
 
     aboutButton.addEventListener("click", () => aboutSheet.classList.add("open"));
     closeAbout.addEventListener("click", () => aboutSheet.classList.remove("open"));
@@ -1206,39 +1216,64 @@
     }
 
     let songAnimationRunning = false;
+    let songAnimationTimer = null;
 
-    function animateAdjacentSong(direction) {
-        if (songAnimationRunning) return;
-
-        const targetNumber = getAdjacentSong(direction);
-        if (targetNumber === null) return;
-
-        songAnimationRunning = true;
-
-        const outClass = direction === 1
-            ? "song-slide-out-left"
-            : "song-slide-out-right";
-
-        const inClass = direction === 1
-            ? "song-slide-in-right"
-            : "song-slide-in-left";
+    function clearSongAnimation() {
+        if (songAnimationTimer !== null) {
+            clearTimeout(songAnimationTimer);
+            songAnimationTimer = null;
+        }
 
         songSwipeContent.classList.remove(
             "song-slide-out-left",
             "song-slide-out-right",
             "song-slide-in-left",
-            "song-slide-in-right"
+            "song-slide-in-right",
+            "is-animating"
         );
+
+        songAnimationRunning = false;
+    }
+
+    function animateAdjacentSong(direction) {
+        if (songAnimationRunning) {
+            return;
+        }
+
+        const targetNumber = getAdjacentSong(direction);
+
+        if (targetNumber === null) {
+            clearSongAnimation();
+            return;
+        }
+
+        clearSongAnimation();
+        songAnimationRunning = true;
+        songSwipeContent.classList.add("is-animating");
+
+        const outClass =
+            direction === 1
+                ? "song-slide-out-left"
+                : "song-slide-out-right";
+
+        const inClass =
+            direction === 1
+                ? "song-slide-in-right"
+                : "song-slide-in-left";
 
         songSwipeContent.classList.add(outClass);
 
-        setTimeout(() => {
+        songAnimationTimer = setTimeout(() => {
             currentSongNumber = targetNumber;
             currentLanguage = "arm";
+
             renderSong();
 
             history.replaceState(
-                { screen: "song", number: currentSongNumber },
+                {
+                    screen: "song",
+                    number: currentSongNumber
+                },
                 "",
                 `#song-${currentSongNumber}`
             );
@@ -1249,11 +1284,16 @@
             void songSwipeContent.offsetWidth;
             songSwipeContent.classList.add(inClass);
 
-            setTimeout(() => {
-                songSwipeContent.classList.remove(inClass);
-                songAnimationRunning = false;
-            }, 250);
-        }, 180);
+            songAnimationTimer = setTimeout(() => {
+                clearSongAnimation();
+            }, 300);
+        }, 200);
+
+        setTimeout(() => {
+            if (songAnimationRunning) {
+                clearSongAnimation();
+            }
+        }, 1000);
     }
 
     let touchStartX = 0;
@@ -1299,6 +1339,14 @@
     songScreen.addEventListener(
         "touchend",
         () => {
+            if (touchStartX === 0 || songAnimationRunning) {
+                touchStartX = 0;
+                touchStartY = 0;
+                touchEndX = 0;
+                touchEndY = 0;
+                return;
+            }
+
             const horizontalDistance =
                 touchEndX - touchStartX;
     
