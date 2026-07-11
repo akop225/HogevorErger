@@ -804,17 +804,32 @@
 
     async function loadSongs() {
         try {
-            const response = await fetch("songs.json", { cache: "no-store" });
-
+            const response = await fetch("./songs.json");
+    
             if (!response.ok) {
-                throw new Error("Не удалось загрузить songs.json");
+                throw new Error(
+                    `Не удалось загрузить songs.json: ${response.status}`
+                );
             }
-
+    
             songs = await response.json();
+    
+            console.log(
+                "Песни загружены:",
+                Object.keys(songs).length
+            );
+    
             renderSongList();
+    
         } catch (loadError) {
-            console.error(loadError);
-            emptyState.textContent = "Не удалось загрузить список песен";
+            console.error(
+                "Не удалось загрузить песни:",
+                loadError
+            );
+    
+            emptyState.textContent =
+                "Не удалось загрузить список песен";
+    
             emptyState.style.display = "block";
         }
     }
