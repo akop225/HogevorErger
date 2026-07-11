@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover"
+    >
+
+    <meta name="theme-color" content="#111111">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent"
+    >
+    <meta
+        name="apple-mobile-web-app-title"
+        content="Hogevor Erger"
+    >
+
+    <link rel="manifest" href="manifest.json">
+
+    <title>Hogevor Erger</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            background: #111111;
+        }
+
+        body {
+            margin: 0;
+
+            background: #111111;
+            color: #ffffff;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "SF Pro Display",
+                "SF Pro Text",
+                sans-serif;
+
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 760px;
+
+            margin: 0 auto;
+
+            padding:
+                calc(env(safe-area-inset-top) + 24px)
+                20px
+                calc(env(safe-area-inset-bottom) + 30px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .app-title {
+            margin: 0;
+
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .search-screen {
+            padding-top: 15vh;
+        }
+
+        .search-title {
+            text-align: center;
+
+            font-size: 26px;
+            font-weight: 700;
+
+            margin-bottom: 30px;
+        }
+
+        .search-form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .song-input {
+            width: 100%;
+
+            border: none;
+            outline: none;
+
+            border-radius: 18px;
+
+            padding: 18px 20px;
+
+            background: #242424;
+            color: #ffffff;
+
+            font-size: 22px;
+            text-align: center;
+        }
+
+        .song-input::placeholder {
+            color: #777777;
+        }
+
+        .search-button {
+            border: none;
+
+            border-radius: 18px;
+
+            padding: 17px 20px;
+
+            background: #ffffff;
+            color: #111111;
+
+            font-size: 18px;
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .error {
+            display: none;
+
+            margin-top: 20px;
+
+            color: #ff6b6b;
+            text-align: center;
+
+            font-size: 16px;
+        }
+
+        .song-screen {
+            display: none;
+        }
+
+        .song-number {
+            text-align: center;
+
+            font-size: 23px;
+            font-weight: 700;
+
+            margin-bottom: 10px;
+        }
+
+        .song-title {
+            text-align: center;
+
+            color: #aaaaaa;
+
+            font-size: 17px;
+
+            margin-bottom: 24px;
+        }
+
+        .languages {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+
+            margin-bottom: 28px;
+        }
+
+        .language-button {
+            width: 64px;
+            height: 50px;
+
+            border: none;
+            border-radius: 16px;
+
+            background: #242424;
+
+            font-size: 27px;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.15s ease,
+                background 0.15s ease;
+        }
+
+        .language-button:active {
+            transform: scale(0.94);
+        }
+
+        .language-button.active {
+            background: #ffffff;
+        }
+
+        .song-text {
+            white-space: pre-wrap;
+
+            font-size: 21px;
+            line-height: 1.55;
+
+            overflow-wrap: break-word;
+        }
+
+        .navigation {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr 1fr;
+
+            gap: 12px;
+
+            margin-top: 35px;
+        }
+
+        .nav-button {
+            height: 58px;
+
+            border: none;
+            border-radius: 18px;
+
+            background: #242424;
+            color: #ffffff;
+
+            font-size: 28px;
+
+            cursor: pointer;
+        }
+
+        .nav-button:active {
+            transform: scale(0.96);
+        }
+
+        .favorite-button.active {
+            color: #ffd60a;
+        }
+
+        .other-song-button {
+            width: 100%;
+
+            margin-top: 14px;
+
+            border: none;
+            border-radius: 18px;
+
+            padding: 17px 20px;
+
+            background: #242424;
+            color: #ffffff;
+
+            font-size: 17px;
+
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <section
+        id="searchScreen"
+        class="search-screen"
+    >
+        <h1 class="search-title">
+            Hogevor Erger
+        </h1>
+
+        <form
+            id="searchForm"
+            class="search-form"
+        >
+            <input
+                id="songInput"
+                class="song-input"
+                type="number"
+                inputmode="numeric"
+                placeholder="Номер песни"
+                min="1"
+                autocomplete="off"
+            >
+
+            <button
+                class="search-button"
+                type="submit"
+            >
+                Найти песню
+            </button>
+        </form>
+
+        <div
+            id="error"
+            class="error"
+        >
+            Песня не найдена
+        </div>
+    </section>
+
+
+    <section
+        id="songScreen"
+        class="song-screen"
+    >
+        <div
+            id="songNumber"
+            class="song-number"
+        ></div>
+
+        <div
+            id="songTitle"
+            class="song-title"
+        ></div>
+
+
+        <div class="languages">
+
+            <button
+                class="language-button active"
+                data-language="arm"
+            >
+                🇦🇲
+            </button>
+
+            <button
+                class="language-button"
+                data-language="ru"
+            >
+                🇷🇺
+            </button>
+
+            <button
+                class="language-button"
+                data-language="en"
+            >
+                🇬🇧
+            </button>
+
+        </div>
+
+
+        <div
+            id="songText"
+            class="song-text"
+        ></div>
+
+
+        <div class="navigation">
+
+            <button
+                id="previousButton"
+                class="nav-button"
+            >
+                ←
+            </button>
+
+            <button
+                id="favoriteButton"
+                class="nav-button favorite-button"
+            >
+                ☆
+            </button>
+
+            <button
+                id="nextButton"
+                class="nav-button"
+            >
+                →
+            </button>
+
+        </div>
+
+
+        <button
+            id="otherSongButton"
+            class="other-song-button"
+        >
+            🔍 Другая песня
+        </button>
+
+    </section>
+
+</div>
+
+
+<script>
+    let songs = {};
+
+    let currentSongNumber = null;
+    let currentLanguage = "arm";
+
+    let favorites = JSON.parse(
+        localStorage.getItem("favorites") || "[]"
+    );
+
+
+    const searchScreen =
+        document.getElementById("searchScreen");
+
+    const songScreen =
+        document.getElementById("songScreen");
+
+    const searchForm =
+        document.getElementById("searchForm");
+
+    const songInput =
+        document.getElementById("songInput");
+
+    const error =
+        document.getElementById("error");
+
+    const songNumber =
+        document.getElementById("songNumber");
+
+    const songTitle =
+        document.getElementById("songTitle");
+
+    const songText =
+        document.getElementById("songText");
+
+    const favoriteButton =
+        document.getElementById("favoriteButton");
+
+    const previousButton =
+        document.getElementById("previousButton");
+
+    const nextButton =
+        document.getElementById("nextButton");
+
+    const otherSongButton =
+        document.getElementById("otherSongButton");
+
+    const languageButtons =
+        document.querySelectorAll(".language-button");
+
+
+    async function loadSongs() {
+        const response = await fetch("songs.json");
+
+        songs = await response.json();
+    }
+
+
+    function openSong(number) {
+        const key = String(number);
+
+        if (!songs[key]) {
+            error.style.display = "block";
+
+            return;
+        }
+
+        error.style.display = "none";
+
+        currentSongNumber = Number(number);
+
+        currentLanguage = "arm";
+
+        searchScreen.style.display = "none";
+        songScreen.style.display = "block";
+
+        renderSong();
+
+        window.scrollTo({
+            top: 0,
+            behavior: "instant"
+        });
+    }
+
+
+    function renderSong() {
+        const song =
+            songs[String(currentSongNumber)];
+
+        if (!song) {
+            return;
+        }
+
+        songNumber.textContent =
+            `🎵 Песня №${currentSongNumber}`;
+
+        songTitle.textContent =
+            song.title || "";
+
+        songText.textContent =
+            song[currentLanguage] || "";
+
+        updateLanguageButtons();
+        updateFavoriteButton();
+    }
+
+
+    function updateLanguageButtons() {
+        languageButtons.forEach(button => {
+            button.classList.toggle(
+                "active",
+                button.dataset.language === currentLanguage
+            );
+        });
+    }
+
+
+    function updateFavoriteButton() {
+        const isFavorite =
+            favorites.includes(currentSongNumber);
+
+        favoriteButton.textContent =
+            isFavorite ? "★" : "☆";
+
+        favoriteButton.classList.toggle(
+            "active",
+            isFavorite
+        );
+    }
+
+
+    function toggleFavorite() {
+        const index =
+            favorites.indexOf(currentSongNumber);
+
+        if (index === -1) {
+            favorites.push(currentSongNumber);
+        } else {
+            favorites.splice(index, 1);
+        }
+
+        localStorage.setItem(
+            "favorites",
+            JSON.stringify(favorites)
+        );
+
+        updateFavoriteButton();
+    }
+
+
+    function openPreviousSong() {
+        const previousNumber =
+            currentSongNumber - 1;
+
+        if (songs[String(previousNumber)]) {
+            currentSongNumber =
+                previousNumber;
+
+            renderSong();
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+    }
+
+
+    function openNextSong() {
+        const nextNumber =
+            currentSongNumber + 1;
+
+        if (songs[String(nextNumber)]) {
+            currentSongNumber =
+                nextNumber;
+
+            renderSong();
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+    }
+
+
+    function showSearch() {
+        songScreen.style.display = "none";
+        searchScreen.style.display = "block";
+
+        songInput.value = "";
+
+        setTimeout(() => {
+            songInput.focus();
+        }, 100);
+    }
+
+
+    searchForm.addEventListener(
+        "submit",
+        event => {
+            event.preventDefault();
+
+            openSong(songInput.value);
+        }
+    );
+
+
+    languageButtons.forEach(button => {
+        button.addEventListener(
+            "click",
+            () => {
+                currentLanguage =
+                    button.dataset.language;
+
+                renderSong();
+            }
+        );
+    });
+
+
+    favoriteButton.addEventListener(
+        "click",
+        toggleFavorite
+    );
+
+
+    previousButton.addEventListener(
+        "click",
+        openPreviousSong
+    );
+
+
+    nextButton.addEventListener(
+        "click",
+        openNextSong
+    );
+
+
+    otherSongButton.addEventListener(
+        "click",
+        showSearch
+    );
+
+
+    loadSongs();
+
+
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register(
+            "service-worker.js"
+        );
+    }
+</script>
+
+</body>
+</html>

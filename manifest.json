@@ -1,0 +1,9 @@
+{
+    "name": "Hogevor Erger",
+    "short_name": "Hogevor Erger",
+    "description": "Духовный песенник",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#111111",
+    "theme_color": "#111111"
+}
