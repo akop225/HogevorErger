@@ -1,4 +1,4 @@
-const CACHE_NAME = "hogevor-erger-v2";
+const CACHE_NAME = "hogevor-erger-v3";
 
 const FILES_TO_CACHE = [
     "./",
