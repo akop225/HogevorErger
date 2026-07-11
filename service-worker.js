@@ -1,24 +1,19 @@
-const CACHE_NAME = "hogevor-ergaran-v1";
+const CACHE_NAME = "hogevor-ergaran-v7";
 
 const FILES_TO_CACHE = [
     "./",
     "./index.html",
     "./songs.json",
-    "./manifest.json",
-    "./icon-192.png",
-    "./icon-512.png"
+    "./manifest.json"
 ];
 
-
 self.addEventListener("install", event => {
-    self.skipWaiting();
-
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(FILES_TO_CACHE))
+            .then(() => self.skipWaiting())
     );
 });
-
 
 self.addEventListener("activate", event => {
     event.waitUntil(
@@ -26,34 +21,72 @@ self.addEventListener("activate", event => {
             .then(cacheNames => {
                 return Promise.all(
                     cacheNames
-                        .filter(cacheName => cacheName !== CACHE_NAME)
-                        .map(cacheName => caches.delete(cacheName))
+                        .filter(name => name !== CACHE_NAME)
+                        .map(name => caches.delete(name))
                 );
             })
             .then(() => self.clients.claim())
     );
 });
 
-
 self.addEventListener("fetch", event => {
     if (event.request.method !== "GET") {
         return;
     }
 
+    const url = new URL(event.request.url);
+
+    if (url.pathname.endsWith("/songs.json")) {
+        event.respondWith(
+            caches.match("./songs.json")
+                .then(cachedResponse => {
+                    if (cachedResponse) {
+                        return cachedResponse;
+                    }
+
+                    return fetch(event.request)
+                        .then(response => {
+                            const responseClone = response.clone();
+
+                            caches.open(CACHE_NAME)
+                                .then(cache => {
+                                    cache.put("./songs.json", responseClone);
+                                });
+
+                            return response;
+                        });
+                })
+        );
+
+        return;
+    }
+
     event.respondWith(
-        fetch(event.request)
-            .then(networkResponse => {
-                const responseClone = networkResponse.clone();
+        caches.match(event.request)
+            .then(cachedResponse => {
+                if (cachedResponse) {
+                    return cachedResponse;
+                }
 
-                caches.open(CACHE_NAME)
-                    .then(cache => {
-                        cache.put(event.request, responseClone);
+                return fetch(event.request)
+                    .then(response => {
+                        if (
+                            !response ||
+                            response.status !== 200 ||
+                            response.type === "opaque"
+                        ) {
+                            return response;
+                        }
+
+                        const responseClone = response.clone();
+
+                        caches.open(CACHE_NAME)
+                            .then(cache => {
+                                cache.put(event.request, responseClone);
+                            });
+
+                        return response;
                     });
-
-                return networkResponse;
-            })
-            .catch(() => {
-                return caches.match(event.request);
             })
     );
 });
