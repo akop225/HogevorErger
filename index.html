@@ -1170,7 +1170,81 @@
             );
         }
     }
-
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+    
+    const SWIPE_DISTANCE = 70;
+    
+    songScreen.addEventListener(
+        "touchstart",
+        event => {
+            if (event.touches.length !== 1) {
+                return;
+            }
+    
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+    
+            touchEndX = touchStartX;
+            touchEndY = touchStartY;
+        },
+        {
+            passive: true
+        }
+    );
+    
+    songScreen.addEventListener(
+        "touchmove",
+        event => {
+            if (event.touches.length !== 1) {
+                return;
+            }
+    
+            touchEndX = event.touches[0].clientX;
+            touchEndY = event.touches[0].clientY;
+        },
+        {
+            passive: true
+        }
+    );
+    
+    songScreen.addEventListener(
+        "touchend",
+        () => {
+            const horizontalDistance =
+                touchEndX - touchStartX;
+    
+            const verticalDistance =
+                touchEndY - touchStartY;
+    
+            const isHorizontalSwipe =
+                Math.abs(horizontalDistance) >
+                Math.abs(verticalDistance) * 1.5;
+    
+            const isLongEnough =
+                Math.abs(horizontalDistance) >=
+                SWIPE_DISTANCE;
+    
+            if (
+                !isHorizontalSwipe ||
+                !isLongEnough
+            ) {
+                return;
+            }
+    
+            if (horizontalDistance < 0) {
+                openAdjacentSong(1);
+            } else {
+                openAdjacentSong(-1);
+            }
+        },
+        {
+            passive: true
+        }
+    );
+    
     startApp();
 
     if ("serviceWorker" in navigator) {
